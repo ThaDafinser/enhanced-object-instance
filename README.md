@@ -8,7 +8,7 @@ This would not be necessary, since this can be also achieved by a Proxy (in most
  https://ocramius.github.io/ProxyManager/docs/access-interceptor-value-holder.html
 
 
-The proxy pattern is at least for some users to complicated...that's there this package come into place.
+The proxy pattern is at least for some end users (package consumers) to complicated...that's there this package come into place.
 
 
 The `UglyProxyManagerFun\EnhanceInstance` class should make it very easy to add a logger or a cache to any existing package.
