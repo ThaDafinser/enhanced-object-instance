@@ -1,7 +1,24 @@
 
 # UglyProxyManagerFun (PROTOTYPE!!!)
 
-Target: reusable cache/logging/tracing/... proxy based on ProxyManager
+Many packages have implementations, that the user can cache or log a request.
+
+
+This would not be necessary, since this can be also achieved by a Proxy (in most cases)
+ https://ocramius.github.io/ProxyManager/docs/access-interceptor-value-holder.html
+
+
+The proxy pattern is at least for some users to complicated...that's there this package come into place.
+
+
+The `UglyProxyManagerFun\EnhanceInstance` class should make it very easy to add a logger or a cache to any existing package.
+Also the package maintainer could add this lib and reference it in the documentation for the enduser
+
+
+Benefits
+- no seperate log/cache code needed anymore in each package
+- not 1000 different ways for the end users, how you need to activate caching / logging 
+
 
 ## Example
 ```php
@@ -27,9 +44,7 @@ class Heavy
     }
 }
 
-$heavyInstance = new Heavy();
-
-$test = new EnhanceInstance($heavyInstance);
+$test = new EnhanceInstance(new Heavy());
 $test->addMethodsCache([
     'loadSlow'
 ]);
