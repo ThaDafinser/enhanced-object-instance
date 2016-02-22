@@ -1,0 +1,26 @@
+{
+    "name": "thadafinser/ugly-proxy-manager-fun",
+    "authors": [
+        {
+            "name": "Martin Keckeis",
+            "email": "martin.keckeis1@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "~7.0",
+        
+    	"psr/log": "~1.0",
+    	"psr/cache": "~1.0",
+    	
+    	"ocramius/proxy-manager": "1.0.*"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "^5.0"
+    },
+    
+    "autoload": {
+        "psr-4": {
+            "UglyProxyManagerFun\\":  "src"
+        }
+    }
+}
