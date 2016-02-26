@@ -1,26 +1,42 @@
 {
     "name": "thadafinser/ugly-proxy-manager-fun",
+    "description": "Fast and easy logging and caching for all class instances! (at least nearly all)",
+    
+    "license": "MIT",
+    
     "authors": [
         {
             "name": "Martin Keckeis",
             "email": "martin.keckeis1@gmail.com"
         }
     ],
-    "require": {
-        "php": "~7.0",
-        
-    	"psr/log": "~1.0",
-    	"psr/cache": "~1.0",
-    	
-    	"ocramius/proxy-manager": "1.0.*"
-    },
-    "require-dev": {
-        "phpunit/PHPUnit": "^5.0"
-    },
     
     "autoload": {
         "psr-4": {
             "UglyProxyManagerFun\\":  "src"
         }
+    },
+    
+    "autoload-dev": {
+        "psr-4": {
+            "UglyProxyManagerFunTest\\Unit\\":  "tests/unit",
+            "UglyProxyManagerFunTest\\Asset\\":  "tests/asset"
+        }
+    },
+    
+    "require": {
+        "php": "~7.0",
+        
+    	"psr/log": "~1.0",
+    	
+    	"psr/cache": "~1.0",
+    	"thadafinser/psr6-null-cache": "~0.1",
+    	
+    	"ocramius/proxy-manager": "1.0.*"
+    },
+    
+    "require-dev": {
+        "phpunit/PHPUnit": "^5.2",
+        "fabpot/php-cs-fixer": "^1.11"
     }
 }

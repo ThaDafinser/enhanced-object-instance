@@ -5,7 +5,7 @@ Many packages have implementations, that the user can cache or log a request.
 
 
 This would not be necessary, since this can be also achieved by a Proxy (in most cases)
- https://ocramius.github.io/ProxyManager/docs/access-interceptor-value-holder.html
+https://ocramius.github.io/ProxyManager/docs/access-interceptor-value-holder.html
 
 
 The proxy pattern is at least for some users to complicated...that's there this package come into place.

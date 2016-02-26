@@ -5,7 +5,9 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Psr\Log\LogLevel;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr6NullCache\Adapter\NullCacheItemPool;
 use ProxyManager\Factory\AccessInterceptorValueHolderFactory as Factory;
+use InvalidArgumentException;
 
 class EnhanceInstance
 {
@@ -26,32 +28,36 @@ class EnhanceInstance
 
     private $methodInterceptors = [];
 
+    private $startTime = [];
+
     /**
      *
      * @param object $instance            
+     * @param CacheItemPoolInterface $cache            
+     * @param LoggerInterface $logger            
      */
     public function __construct($instance, CacheItemPoolInterface $cache = null, LoggerInterface $logger = null)
     {
+        if (! is_object($instance)) {
+            throw new InvalidArgumentException('instance parameter must be a object');
+        }
+        
         $this->instance = $instance;
         
         if ($cache === null) {
             $cache = new NullCacheItemPool();
         }
-        $this->setCache($cache);
+        $this->cache = $cache;
         
         if ($logger === null) {
             $logger = new NullLogger();
         }
-        $this->setLogger($logger);
+        $this->logger = $logger;
     }
 
-    /**
-     *
-     * @param CacheItemPoolInterface $cache            
-     */
-    public function setCache(CacheItemPoolInterface $cache)
+    public function getOriginalInstance()
     {
-        $this->cache = $cache;
+        return $this->instance;
     }
 
     /**
@@ -63,13 +69,9 @@ class EnhanceInstance
         return $this->cache;
     }
 
-    /**
-     *
-     * @param LoggerInterface $logger            
-     */
-    public function setLogger(LoggerInterface $logger)
+    private function getCacheKey($method, $parameters)
     {
-        $this->logger = $logger;
+        return md5($method . serialize($parameters));
     }
 
     /**
@@ -122,7 +124,6 @@ class EnhanceInstance
     private function getValueAsPrintString($returnValue)
     {
         if (is_array($returnValue)) {
-            
             $serializedArray = [];
             foreach ($returnValue as $key => $value) {
                 if (! is_scalar($value)) {
@@ -178,12 +179,17 @@ class EnhanceInstance
         $msg .= ' ' . get_class($instance) . '::' . $method . '(' . implode(', ', $this->getParametersToString($params)) . ')';
         
         if ($type == 'post' || $type == 'cacheHit') {
+            if (isset($this->startTime[$method])) {
+                $usedTime = microtime(true) - $this->startTime[$method];
+                
+                $msg .= ' | Time used: ' . round($usedTime, 6);
+            }
             $msg .= ' | Return: ' . $this->getValueAsPrintString($returnValue);
+        } elseif ($type == 'pre') {
+            $this->startTime[$method] = microtime(true);
         }
         
         return $msg;
-        
-        $logger->log('warn', get_class($instance) . '::' . $method . '(' . implode(', ', $parameters) . ') POST | ' . microtime(true) . ' | Result: ' . $returnValue);
     }
 
     /**
@@ -192,7 +198,7 @@ class EnhanceInstance
      */
     public function getAwesomeInstance()
     {
-        $enhanceInstance = $this;
+        $enhancedInstance = $this;
         $cache = $this->getCache();
         $logger = $this->getLogger();
         
@@ -204,20 +210,18 @@ class EnhanceInstance
             /*
              * prefix
              */
-            $prefixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, & $returnEarly) use($settings, $enhanceInstance, $cache, $logger) {
+            $prefixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, & $returnEarly) use ($settings, $enhancedInstance, $cache,$logger) {
                 
                 // caching
                 if (isset($settings['cache']['enabled']) && $settings['cache']['enabled'] === true) {
-                    $key = md5(serialize($params));
-                    
-                    if ($cache->hasItem($key) === true) {
+                    if ($cache->hasItem($this->getCacheKey($method, $params)) === true) {
                         $returnEarly = true;
                         
-                        $cacheItem = $cache->getItem($key);
+                        $cacheItem = $cache->getItem($this->getCacheKey($method, $params));
                         
                         // logging - cacheHit
                         if (isset($settings['logging']['enabled']) && $settings['logging']['enabled'] === true) {
-                            $logger->log($settings['logging']['level'], $enhanceInstance->formatLogMsg('cacheHit', $proxy, $instance, $method, $params, $cacheItem));
+                            $logger->log($settings['logging']['level'], $enhancedInstance->formatLogMsg('cacheHit', $proxy, $instance, $method, $params, $cacheItem));
                         }
                         
                         return $cacheItem->get();
@@ -226,20 +230,18 @@ class EnhanceInstance
                 
                 // logging
                 if (isset($settings['logging']['enabled']) && $settings['logging']['enabled'] === true) {
-                    $logger->log($settings['logging']['level'], $enhanceInstance->formatLogMsg('pre', $proxy, $instance, $method, $params));
+                    $logger->log($settings['logging']['level'], $enhancedInstance->formatLogMsg('pre', $proxy, $instance, $method, $params));
                 }
             };
             
             /*
              * suffix
              */
-            $suffixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, $returnValue, & $returnEarly) use($settings, $enhanceInstance, $cache, $logger) {
+            $suffixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, $returnValue, & $returnEarly) use ($settings, $enhancedInstance, $cache,$logger) {
                 
                 // caching
                 if (isset($settings['cache']['enabled']) && $settings['cache']['enabled'] === true) {
-                    $key = md5(serialize($params));
-                    
-                    $item = $cache->getItem($key);
+                    $item = $cache->getItem($this->getCacheKey($method, $params));
                     $item->set($returnValue);
                     
                     $cache->save($item);
@@ -247,7 +249,7 @@ class EnhanceInstance
                 
                 // logging
                 if (isset($settings['logging']['enabled']) && $settings['logging']['enabled'] === true) {
-                    $logger->log($settings['logging']['level'], $enhanceInstance->formatLogMsg('post', $proxy, $instance, $method, $params, $returnValue));
+                    $logger->log($settings['logging']['level'], $enhancedInstance->formatLogMsg('post', $proxy, $instance, $method, $params, $returnValue));
                 }
             };
         }

@@ -1,5 +1,9 @@
-/vendor/
+
 .settings
 .buildpath
 .project
+.php_cs.cache
 composer.lock
+
+build/
+vendor/
