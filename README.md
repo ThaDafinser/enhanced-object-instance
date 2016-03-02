@@ -23,7 +23,13 @@ Thank's to the PHP-FIG it's now possible!
 - You need caching/logging for a package you consume, which does not provide it
 - You currently develop a class/package and need caching/logging and dont want to waste your time
 
-## Example
+## Next steps
+
+- [ ] add logging (TODO formatter idea)
+- [ ] add events?
+
+## Example caching
+
 ```php
 require 'vendor/autoload.php';
 
