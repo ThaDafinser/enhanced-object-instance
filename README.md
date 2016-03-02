@@ -17,7 +17,7 @@ Thank's to the PHP-FIG it's now possible!
 ```php
 require 'vendor/autoload.php';
 
-use Psr6NullCache\Adapter\NullCacheItemPool;
+use Psr6NullCache\Adapter\MemoryCacheItemPool;
 use EnhancedObjectInstance\EnhanceInstance;
 
 class Heavy
@@ -34,7 +34,7 @@ class Heavy
 }
 
 // your PSR-6 cache adapter - https://packagist.org/providers/psr/cache-implementation
-$cache = NullCacheItemPool();
+$cache = MemoryCacheItemPool();
 
 $test = new EnhanceInstance(new Heavy());
 $test->addMethodCache('getCallCount', $cache);
