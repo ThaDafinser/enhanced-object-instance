@@ -1,6 +1,24 @@
 {
-    "name": "thadafinser/ugly-proxy-manager-fun",
-    "description": "Fast and easy logging and caching for all class instances! (at least nearly all)",
+    "name": "thadafinser/enhanced-object-instance",
+    "description": "Provide PSR caching/logging for (nearly) all object instances through a proxy",
+    "keywords": [
+        "psr-3",
+        "psr3",
+        "log",
+        "logging",
+        
+        "psr-6",
+        "psr6",
+        "cache",
+        "caching",
+        "memoize",
+        
+        "proxy",
+        "proxymanager",
+        "proxy pattern",
+        
+        "enhance instance"
+    ],
     
     "license": "MIT",
     
@@ -13,14 +31,14 @@
     
     "autoload": {
         "psr-4": {
-            "UglyProxyManagerFun\\":  "src"
+            "EnhancedObjectInstance\\":  "src"
         }
     },
     
     "autoload-dev": {
         "psr-4": {
-            "UglyProxyManagerFunTest\\Unit\\":  "tests/unit",
-            "UglyProxyManagerFunTest\\Asset\\":  "tests/asset"
+            "EnhancedObjectInstanceTest\\Unit\\":  "tests/unit",
+            "EnhancedObjectInstanceTest\\Asset\\":  "tests/asset"
         }
     },
     
@@ -38,5 +56,10 @@
     "require-dev": {
         "phpunit/PHPUnit": "^5.2",
         "fabpot/php-cs-fixer": "^1.11"
+    },
+    
+    "provide": {
+        "psr/log-implementation": "1.0.0",
+        "psr/cache-implementation": "1.0.0"
     }
 }

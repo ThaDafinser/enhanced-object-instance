@@ -1,14 +1,14 @@
 <?php
-namespace UglyProxyManagerFunTest\Unit;
+namespace EnhancedObjectInstanceTest\Unit;
 
 use PHPUnit_Framework_TestCase;
-use UglyProxyManagerFun\EnhanceInstance;
-use UglyProxyManagerFunTest\Asset\SimpleClass;
+use EnhancedObjectInstance\EnhanceInstance;
 use Psr6NullCache\Adapter\MemoryCacheItemPool;
-use UglyProxyManagerFunTest\Asset\SimpleClassWithParameters;
+use EnhancedObjectInstanceTest\Asset\SimpleCounter;
+use EnhancedObjectInstanceTest\Asset\SimpleCounterWithParameters;
 
 /**
- * @covers UglyProxyManagerFun\EnhanceInstance
+ * @covers EnhancedObjectInstance\EnhanceInstance
  */
 class EnhanceInstanceTest extends PHPUnit_Framework_TestCase
 {
@@ -25,30 +25,26 @@ class EnhanceInstanceTest extends PHPUnit_Framework_TestCase
 
     public function testCreateInstance()
     {
-        $instance = new SimpleClass();
+        $instance = new SimpleCounter();
         
         $enhance = new EnhanceInstance($instance);
-        $this->assertInstanceOf('UglyProxyManagerFunTest\Asset\SimpleClass', $enhance->getOriginalInstance());
-        $this->assertInstanceOf('Psr\Cache\CacheItemPoolInterface', $enhance->getCache());
-        $this->assertInstanceOf('Psr\Log\LoggerInterface', $enhance->getLogger());
+        $this->assertInstanceOf('EnhancedObjectInstanceTest\Asset\SimpleCounter', $enhance->getOriginalInstance());
     }
 
-    public function testCustomClassCacheCounter()
+    public function testCacheSimpleCounter()
     {
-        $class = new \ReflectionClass('UglyProxyManagerFun\EnhanceInstance');
+        $class = new \ReflectionClass('EnhancedObjectInstance\EnhanceInstance');
         $method = $class->getMethod('getCacheKey');
         $method->setAccessible(true);
         
-        $instance = new SimpleClass();
+        $instance = new SimpleCounter();
         $this->assertEquals(1, $instance->getCallCount());
         $this->assertEquals(2, $instance->getCallCount());
         
         $memory = new MemoryCacheItemPool();
         
-        $enhance = new EnhanceInstance($instance, $memory);
-        $enhance->addMethodsCache([
-            'getCallCount'
-        ]);
+        $enhance = new EnhanceInstance($instance);
+        $enhance->addMethodCache('getCallCount', $memory);
         
         $cacheKey = $method->invokeArgs($enhance, [
             'getCallCount',
@@ -58,7 +54,7 @@ class EnhanceInstanceTest extends PHPUnit_Framework_TestCase
         // no cache result available
         $this->assertFalse($memory->hasItem($cacheKey));
         
-        /* @var $instance \UglyProxyManagerFunTest\Asset\SimpleClass */
+        /* @var $instance \EnhancedObjectInstanceTest\Asset\SimpleCounter */
         $instance = $enhance->getAwesomeInstance();
         $this->assertEquals(3, $instance->getCallCount());
         
@@ -72,15 +68,13 @@ class EnhanceInstanceTest extends PHPUnit_Framework_TestCase
 
     public function testCustomClassCacheCounterWithParamters()
     {
-        $instance = new SimpleClassWithParameters();
+        $instance = new SimpleCounterWithParameters();
         $memory = new MemoryCacheItemPool();
         
         $enhance = new EnhanceInstance($instance, $memory);
-        $enhance->addMethodsCache([
-            'getCallCount'
-        ]);
+        $enhance->addMethodCache('getCallCount', $memory);
         
-        /* @var $instance \UglyProxyManagerFunTest\Asset\SimpleClassWithParameters */
+        /* @var $instance \EnhancedObjectInstanceTest\Asset\SimpleCounterWithParameters */
         $instance = $enhance->getAwesomeInstance();
         
         $this->assertEquals(1, $instance->getCallCount(1));

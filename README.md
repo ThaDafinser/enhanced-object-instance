@@ -1,76 +1,47 @@
 
-# UglyProxyManagerFun (PROTOTYPE!!!)
+# PSR logging and caching for all object instances
 
-Many packages have implementations, that the user can cache or log a request.
+Instant ***caching*** and ***logging (WIP)*** for all object instances.
 
-
-This would not be necessary, since this can be also achieved by a Proxy (in most cases)
-https://ocramius.github.io/ProxyManager/docs/access-interceptor-value-holder.html
-
-
-The proxy pattern is at least for some end users (package consumers) to complicated...that's there this package come into place.
+Thank's to the PHP-FIG it's now possible!
+- [PSR-3 logging](http://www.php-fig.org/psr/psr-3/)
+- [PSR-6 caching](http://www.php-fig.org/psr/psr-6/)
 
 
-The `UglyProxyManagerFun\EnhanceInstance` class should make it very easy to add a logger or a cache to any existing package.
-Also the package maintainer could add this lib and reference it in the documentation for the enduser
+## When i need this?
 
-
-Benefits
-- no seperate log/cache code needed anymore in each package
-- not 1000 different ways for the end users, how you need to activate caching / logging 
-
+- You need caching/logging for a package you consume, which does not provide it
+- You currently develop a class/package and need caching/logging and dont want to waste your time
 
 ## Example
 ```php
 require 'vendor/autoload.php';
 
-use UglyProxyManagerFun\EnhanceInstance;
+use Psr6NullCache\Adapter\NullCacheItemPool;
+use EnhancedObjectInstance\EnhanceInstance;
 
 class Heavy
 {
 
-    public function loadSlow(array $first = [], $second = true)
-    {
-        sleep(1);
-        
-        return 'yippie';
-    }
+    private $callCount = 0;
 
-    public function loadFast()
+    public function getCallCount()
     {
-        return [
-            'something'
-        ];
+        $this->callCount ++;
+        
+        return $this->callCount;
     }
 }
 
+// your PSR-6 cache adapter - https://packagist.org/providers/psr/cache-implementation
+$cache = NullCacheItemPool();
+
 $test = new EnhanceInstance(new Heavy());
-$test->addMethodsCache([
-    'loadSlow'
-]);
-$test->addMethodsLogging([
-    'loadSlow',
-    'loadFast'
-]);
+$test->addMethodCache('getCallCount', $cache);
 
 /* @var $heavyInstance \Heavy */
 $heavyInstance = $test->getAwesomeInstance();
-$heavyInstance->loadSlow([
-    'a',
-    'b'
-], false);
-$heavyInstance->loadFast();
 
-```
-
-## Example output
-
-```cli
-C:\Data\wap\htdocs\GitHub\UglyProxyManagerFun>php test.php
-PRE        Heavy::loadSlow([0 => 'a', 1 => 'b'], false)
-POST       Heavy::loadSlow([0 => 'a', 1 => 'b'], false) | Return: 'yippie'
-PRE        Heavy::loadFast()
-POST       Heavy::loadFast() | Return: [0 => 'something']
-DONE
-C:\Data\wap\htdocs\GitHub\UglyProxyManagerFun>
+echo $heavyInstance->getCallCount(); // output 1
+echo $heavyInstance->getCallCount(); // output 1, because cached :-)
 ```
