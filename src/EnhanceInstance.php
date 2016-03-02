@@ -11,10 +11,6 @@ class EnhanceInstance
 
     private $instance;
 
-    private $methodInterceptors = [];
-
-    private $startTime = [];
-
     /**
      *
      * @param object $instance            
