@@ -3,7 +3,8 @@ namespace EnhancedObjectInstance;
 
 use Psr\Cache\CacheItemPoolInterface;
 
-trait CacheTrait{
+trait CacheTrait
+{
 
     /**
      *

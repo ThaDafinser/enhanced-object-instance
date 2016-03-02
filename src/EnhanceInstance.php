@@ -53,7 +53,7 @@ class EnhanceInstance
             /*
              * prefix
              */
-            $prefixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, &$returnEarly) use($enhancedInstance, $cache) {
+            $prefixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, &$returnEarly) use ($enhancedInstance, $cache) {
                 
                 // caching
                 if ($cache->hasItem($this->getCacheKey($method, $params)) === true) {
@@ -68,7 +68,7 @@ class EnhanceInstance
             /*
              * suffix
              */
-            $suffixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, $returnValue, &$returnEarly) use($enhancedInstance, $cache) {
+            $suffixInterceptors[$methodName] = function ($proxy, $instance, $method, $params, $returnValue, &$returnEarly) use ($enhancedInstance, $cache) {
                 
                 // caching
                 $item = $cache->getItem($this->getCacheKey($method, $params));
